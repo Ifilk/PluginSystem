@@ -1,0 +1,418 @@
+[2025-05-29  22:27:25.448] plugin_manager.py -> listeners_exec line:231 [DEBUG] : Interrupt polling
+[2025-05-29  23:16:52.506] plugin_manager.py -> listeners_exec line:272 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugins\manager_extension\reactive_cmd.py", line 128, in _reactive_cmd
+    lm.__dict__[ws[0]](*ws[1:])
+    ~~~~~~~~~~~^^^^^^^
+KeyError: 'hello'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 229, in listeners_exec
+    result = ls.func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugins\manager_extension\reactive_cmd.py", line 130, in _reactive_cmd
+    lm.error(f'Unknown signal {ws[0]}')
+    ^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 376, in __getattr__
+    raise e
+  File "D:\Project\PluginSystem\plugin_manager.py", line 373, in __getattr__
+    return self.__dict__[item]
+           ~~~~~~~~~~~~~^^^^^^
+KeyError: 'error'
+
+[2025-05-29  23:20:19.081] plugin_manager.py -> listeners_exec line:231 [DEBUG] : Interrupt polling
+[2025-05-29  23:20:25.419] plugin_manager.py -> listeners_exec line:272 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 229, in listeners_exec
+    result = ls.func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugins\manager_extension\reactive_cmd.py", line 128, in _reactive_cmd
+    lm.__dict__.get(ws[0])(*ws[1:])
+TypeError: 'NoneType' object is not callable
+
+[2025-05-29  23:24:34.118] plugin_manager.py -> listeners_exec line:231 [DEBUG] : Interrupt polling
+[2025-05-29  23:31:46.557] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-29  23:32:21.145] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-29  23:38:55.276] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-29  23:39:43.323] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-29  23:40:10.049] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-29  23:40:15.434] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-29  23:40:23.719] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-29  23:42:58.865] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-29  23:43:58.821] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-29  23:46:13.380] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-30  00:01:15.760] plugin_manager.py -> listeners_exec line:286 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 243, in listeners_exec
+    result = ls.func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugins\manager_extension\reactive_cmd.py", line 156, in unload
+    if _LISTENER.unload_plugin(plugin_name) > 0:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 311, in unload_plugin
+    for event_name in list(self.ListenerDict.keys()):
+                           ^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 390, in __getattr__
+    raise e
+  File "D:\Project\PluginSystem\plugin_manager.py", line 387, in __getattr__
+    return self.__dict__[item]
+           ~~~~~~~~~~~~~^^^^^^
+KeyError: 'ListenerDict'
+
+[2025-05-30  00:02:42.150] plugin_manager.py -> listeners_exec line:286 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 243, in listeners_exec
+    result = ls.func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugins\manager_extension\reactive_cmd.py", line 156, in unload
+    if _LISTENER.unload_plugin(plugin_name) > 0:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 327, in unload_plugin
+    del self.ListenerDict[event_name]
+        ^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 390, in __getattr__
+    raise e
+  File "D:\Project\PluginSystem\plugin_manager.py", line 387, in __getattr__
+    return self.__dict__[item]
+           ~~~~~~~~~~~~~^^^^^^
+KeyError: 'ListenerDict'
+
+[2025-05-30  00:03:55.434] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-30  00:04:07.913] plugin_manager.py -> listeners_exec line:286 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 243, in listeners_exec
+    result = ls.func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugins\manager_extension\reactive_cmd.py", line 156, in unload
+    if _LISTENER.unload_plugin(plugin_name) > 0:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 328, in unload_plugin
+    if event_name in self.TriggerList:
+                     ^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 390, in __getattr__
+    raise e
+  File "D:\Project\PluginSystem\plugin_manager.py", line 387, in __getattr__
+    return self.__dict__[item]
+           ~~~~~~~~~~~~~^^^^^^
+KeyError: 'TriggerList'
+
+[2025-05-30  00:04:50.861] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-30  00:05:06.838] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-30  00:06:08.526] plugin_manager.py -> listeners_exec line:286 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 243, in listeners_exec
+    result = ls.func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugins\manager_extension\reactive_cmd.py", line 156, in unload
+    if _LISTENER.unload_plugin(plugin_name) > 0:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 301, in unload_plugin
+    p for p in self.plugin_applied_register
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 390, in __getattr__
+    raise e
+  File "D:\Project\PluginSystem\plugin_manager.py", line 387, in __getattr__
+    return self.__dict__[item]
+           ~~~~~~~~~~~~~^^^^^^
+KeyError: 'plugin_applied_register'
+
+[2025-05-30  00:09:56.009] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-30  01:17:02.062] plugin_manager.py -> listeners_exec line:286 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 243, in listeners_exec
+    result = ls.func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: init() missing 1 required positional argument: 'lm'
+
+[2025-05-30  01:17:17.063] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-30  01:17:21.002] plugin_manager.py -> listeners_exec line:286 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 243, in listeners_exec
+    result = ls.func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugins\manager_extension\reactive_cmd.py", line 131, in reactive_cmd
+    ws = rewrote.split()
+         ^^^^^^^
+UnboundLocalError: cannot access local variable 'rewrote' where it is not associated with a value
+
+[2025-05-30  01:17:55.263] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-30  01:17:57.932] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-30  01:19:12.169] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-30  01:19:15.447] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-30  01:22:44.470] plugin_manager.py -> listeners_exec line:286 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 243, in listeners_exec
+    result = ls.func(*args, **kwargs)
+TypeError: reactive_cmd() takes 0 positional arguments but 1 was given
+
+[2025-05-30  01:22:59.123] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-30  01:23:22.111] plugin_manager.py -> listeners_exec line:245 [DEBUG] : Interrupt polling
+[2025-05-30  01:33:44.165] plugin_manager.py -> listeners_exec line:290 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 247, in listeners_exec
+    result = ls.func(*args, **kwargs)
+TypeError: reactive_cmd() takes 0 positional arguments but 1 was given
+
+[2025-05-30  01:33:54.831] plugin_manager.py -> listeners_exec line:249 [DEBUG] : Interrupt polling
+[2025-05-30  01:33:59.360] plugin_manager.py -> listeners_exec line:249 [DEBUG] : Interrupt polling
+[2025-05-30  01:36:05.829] plugin_manager.py -> listeners_exec line:249 [DEBUG] : Interrupt polling
+[2025-05-30  01:36:13.103] plugin_manager.py -> listeners_exec line:249 [DEBUG] : Interrupt polling
+[2025-05-30  01:36:16.153] plugin_manager.py -> listeners_exec line:249 [DEBUG] : Interrupt polling
+[2025-05-30  01:37:08.721] plugin_manager.py -> listeners_exec line:249 [DEBUG] : Interrupt polling
+[2025-05-30  01:37:11.045] plugin_manager.py -> listeners_exec line:249 [DEBUG] : Interrupt polling
+[2025-05-30  01:37:13.068] plugin_manager.py -> listeners_exec line:249 [DEBUG] : Interrupt polling
+[2025-05-30  01:37:19.282] plugin_manager.py -> listeners_exec line:249 [DEBUG] : Interrupt polling
+[2025-05-30  01:37:33.349] plugin_manager.py -> listeners_exec line:249 [DEBUG] : Interrupt polling
+[2025-05-30  01:39:51.976] plugin_manager.py -> listeners_exec line:290 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 247, in listeners_exec
+    result = ls.func(*args, **kwargs)
+TypeError: reactive_cmd() takes 0 positional arguments but 1 was given
+
+[2025-05-30  01:40:10.701] plugin_manager.py -> listeners_exec line:249 [DEBUG] : Interrupt polling
+[2025-05-30  01:40:13.682] plugin_manager.py -> listeners_exec line:249 [DEBUG] : Interrupt polling
+[2025-05-30  01:40:28.144] plugin_manager.py -> listeners_exec line:249 [DEBUG] : Interrupt polling
+[2025-05-30  01:40:41.845] plugin_manager.py -> listeners_exec line:249 [DEBUG] : Interrupt polling
+[2025-05-30  01:40:48.748] plugin_manager.py -> listeners_exec line:290 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 247, in listeners_exec
+    result = ls.func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugins\manager_extension\reactive_cmd.py", line 152, in plugin_list
+    for plugin_name, plugin_version in _LISTENER.plugin_list:
+TypeError: 'function' object is not iterable
+
+[2025-05-30  01:46:11.973] plugin_manager.py -> listeners_exec line:249 [DEBUG] : Interrupt polling
+[2025-05-30  01:46:16.195] plugin_manager.py -> listeners_exec line:249 [DEBUG] : Interrupt polling
+[2025-05-30  01:46:19.788] plugin_manager.py -> listeners_exec line:249 [DEBUG] : Interrupt polling
+[2025-05-30  01:46:27.585] plugin_manager.py -> listeners_exec line:249 [DEBUG] : Interrupt polling
+[2025-05-30  01:46:37.832] plugin_manager.py -> listeners_exec line:249 [DEBUG] : Interrupt polling
+[2025-05-30  01:46:54.484] plugin_manager.py -> listeners_exec line:290 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 247, in listeners_exec
+    result = ls.func(*args, **kwargs)
+TypeError: reactive_cmd() takes 0 positional arguments but 1 was given
+
+[2025-05-30  01:56:02.557] plugin_manager.py -> listeners_exec line:472 [DEBUG] : Interrupt polling
+[2025-05-30  01:56:05.909] plugin_manager.py -> listeners_exec line:472 [DEBUG] : Interrupt polling
+[2025-05-30  01:56:08.960] plugin_manager.py -> listeners_exec line:472 [DEBUG] : Interrupt polling
+[2025-05-30  01:58:22.094] plugin_manager.py -> listeners_exec line:474 [DEBUG] : Interrupt polling
+[2025-05-30  01:58:24.945] plugin_manager.py -> listeners_exec line:515 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 447, in safe_execute_listener
+    return listener_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unload() missing 1 required positional argument: 'plugin_name'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 472, in listeners_exec
+    result = safe_execute_listener(ls.func, args, kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 456, in safe_execute_listener
+    raise SignalEmitException(format_error_output(listener_func, args, kwargs, e))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 193, in __init__
+    super.__init__(msg)
+TypeError: descriptor '__init__' requires a 'super' object but received a 'str'
+
+[2025-05-30  01:59:09.126] plugin_manager.py -> listeners_exec line:474 [DEBUG] : Interrupt polling
+[2025-05-30  01:59:11.034] plugin_manager.py -> listeners_exec line:515 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 447, in safe_execute_listener
+    return listener_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unload() missing 1 required positional argument: 'plugin_name'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 472, in listeners_exec
+    result = safe_execute_listener(ls.func, args, kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 456, in safe_execute_listener
+    raise SignalEmitException(format_error_output(listener_func, args, kwargs, e))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 193, in __init__
+    super(msg)
+TypeError: super() argument 1 must be a type, not str
+
+[2025-05-30  01:59:39.537] plugin_manager.py -> listeners_exec line:474 [DEBUG] : Interrupt polling
+[2025-05-30  01:59:41.442] plugin_manager.py -> listeners_exec line:515 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 447, in safe_execute_listener
+    return listener_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unload() missing 1 required positional argument: 'plugin_name'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 472, in listeners_exec
+    result = safe_execute_listener(ls.func, args, kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 456, in safe_execute_listener
+    raise SignalEmitException(format_error_output(listener_func, args, kwargs, e))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 193, in __init__
+    super(msg)
+TypeError: super() argument 1 must be a type, not str
+
+[2025-05-30  02:01:05.102] plugin_manager.py -> listeners_exec line:478 [DEBUG] : Interrupt polling
+[2025-05-30  02:01:08.079] plugin_manager.py -> listeners_exec line:519 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 451, in safe_execute_listener
+    return listener_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unload() missing 1 required positional argument: 'plugin_name'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 476, in listeners_exec
+    result = safe_execute_listener(ls.func, args, kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 460, in safe_execute_listener
+    raise SignalEmitException(format_error_output(listener_func, args, kwargs, e))
+plugin_manager.SignalEmitException: Signal 'unload' emitted abortively:
+<unload(plugin_name)>
+Original error: TypeError: unload() missing 1 required positional argument: 'plugin_name'
+
+[2025-05-30  02:03:05.024] plugin_manager.py -> listeners_exec line:478 [DEBUG] : Interrupt polling
+[2025-05-30  02:03:07.121] plugin_manager.py -> listeners_exec line:511 [ERROR] : Signal 'unload' emitted abortively:
+<unload(plugin_name)>
+Original error: TypeError: unload() missing 1 required positional argument: 'plugin_name'
+[2025-05-30  02:04:39.804] plugin_manager.py -> listeners_exec line:478 [DEBUG] : Interrupt polling
+[2025-05-30  02:04:41.871] plugin_manager.py -> listeners_exec line:511 [ERROR] : Signal 'unload' emitted abortively:
+unload(plugin_name)
+Original error: unload() missing 1 required positional argument: 'plugin_name'
+[2025-05-30  02:11:48.838] plugin_manager.py -> listeners_exec line:482 [DEBUG] : Interrupt polling
+[2025-05-30  02:13:22.098] plugin_manager.py -> listeners_exec line:482 [DEBUG] : Interrupt polling
+[2025-05-30  02:13:25.189] plugin_manager.py -> listeners_exec line:526 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 480, in listeners_exec
+    result = safe_execute_listener(ls.func, args, kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 466, in safe_execute_listener
+    raise e
+  File "D:\Project\PluginSystem\plugin_manager.py", line 455, in safe_execute_listener
+    return listener_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugins\manager_extension\reactive_cmd.py", line 135, in reactive_cmd
+    _LISTENER.__getattr__(ws[0])(*ws[1:])
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 365, in __getattr__
+    raise e
+  File "D:\Project\PluginSystem\plugin_manager.py", line 355, in __getattr__
+    return self.__dict__[item]
+           ~~~~~~~~~~~~~^^^^^^
+KeyError: 'uload'
+
+[2025-05-30  02:20:05.437] plugin_manager.py -> listeners_exec line:477 [DEBUG] : Interrupt polling
+[2025-05-30  02:20:08.744] plugin_manager.py -> listeners_exec line:521 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 347, in __getattr__
+    return self.__dict__[item]
+           ~~~~~~~~~~~~~^^^^^^
+KeyError: 'uload'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 475, in listeners_exec
+    result = safe_execute_listener(ls.func, args, kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 461, in safe_execute_listener
+    raise e
+  File "D:\Project\PluginSystem\plugin_manager.py", line 450, in safe_execute_listener
+    return listener_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugins\manager_extension\reactive_cmd.py", line 135, in reactive_cmd
+    _LISTENER.__getattr__(ws[0])(*ws[1:])
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 360, in __getattr__
+    raise e
+  File "D:\Project\PluginSystem\plugin_manager.py", line 350, in __getattr__
+    return self.trigger_dict[item]
+           ~~~~~~~~~~~~~~~~~^^^^^^
+KeyError: 'uload'
+
+[2025-05-30  02:27:38.648] plugin_manager.py -> listeners_exec line:477 [DEBUG] : Interrupt polling
+[2025-05-30  02:28:45.144] plugin_manager.py -> listeners_exec line:510 [ERROR] : Signal 'unload' emitted abortively:
+unload(plugin_name)
+Original error: unload() missing 1 required positional argument: 'plugin_name'
+[2025-05-30  02:32:01.533] plugin_manager.py -> listeners_exec line:477 [DEBUG] : Interrupt polling
+[2025-05-30  02:34:37.103] plugin_manager.py -> listeners_exec line:521 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 475, in listeners_exec
+    result = safe_execute_listener(ls.func, args, kwargs)
+  File "D:\Project\PluginSystem\plugin_manager.py", line 461, in safe_execute_listener
+    raise e
+  File "D:\Project\PluginSystem\plugin_manager.py", line 450, in safe_execute_listener
+    return listener.func(*args, **kwargs)
+AttributeError: 'function' object has no attribute 'func'
+
+[2025-05-30  02:34:58.898] plugin_manager.py -> listeners_exec line:477 [DEBUG] : Interrupt polling
+[2025-05-30  02:35:15.097] plugin_manager.py -> listeners_exec line:477 [DEBUG] : Interrupt polling
+[2025-05-30  02:35:15.098] plugin_manager.py -> listeners_exec line:477 [DEBUG] : Interrupt polling
+[2025-05-30  02:35:15.098] plugin_manager.py -> listeners_exec line:477 [DEBUG] : Interrupt polling
+[2025-05-30  02:35:15.099] plugin_manager.py -> listeners_exec line:477 [DEBUG] : Interrupt polling
+[2025-05-30  02:35:15.099] plugin_manager.py -> listeners_exec line:477 [DEBUG] : Interrupt polling
+[2025-05-30  02:35:15.100] plugin_manager.py -> listeners_exec line:477 [DEBUG] : Interrupt polling
+[2025-05-30  02:35:15.100] plugin_manager.py -> listeners_exec line:477 [DEBUG] : Interrupt polling
+[2025-05-30  02:35:15.101] plugin_manager.py -> listeners_exec line:477 [DEBUG] : Interrupt polling
+[2025-05-30  15:37:48.457] plugin_manager.py -> listeners_exec line:537 [ERROR] : Signal 'reactive_cmd' emitted abortively:
+reactive_cmd(ctx)
+
+[2025-05-30  15:38:53.362] plugin_manager.py -> listeners_exec line:537 [ERROR] : Signal 'reactive_cmd' emitted abortively:
+reactive_cmd(ctx)
+
+[2025-05-30  15:40:54.902] plugin_manager.py -> listeners_exec line:504 [DEBUG] : Interrupt polling
+[2025-05-30  15:40:59.153] plugin_manager.py -> listeners_exec line:548 [ERROR] : Traceback (most recent call last):
+  File "D:\Project\PluginSystem\plugin_manager.py", line 502, in listeners_exec
+    result = safe_execute_listener(ls, context, args, kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugin_manager.py", line 488, in safe_execute_listener
+    raise e
+  File "D:\Project\PluginSystem\plugin_manager.py", line 477, in safe_execute_listener
+    return listener.func(context, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Project\PluginSystem\plugins\manager_extension\reactive_cmd.py", line 135, in reactive_cmd
+    func = ctx.__getattr__(ws[0])
+           ^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute '__getattr__'. Did you mean: '__setattr__'?
+
+[2025-05-30  15:44:38.422] plugin_manager.py -> listeners_exec line:444 [DEBUG] : Interrupt polling
+[2025-05-30  15:44:41.858] plugin_manager.py -> listeners_exec line:444 [DEBUG] : Interrupt polling
+[2025-05-30  15:44:41.858] plugin_manager.py -> listeners_exec line:444 [DEBUG] : Interrupt polling
+[2025-05-30  15:44:41.859] plugin_manager.py -> listeners_exec line:444 [DEBUG] : Interrupt polling
+[2025-05-30  15:44:41.860] plugin_manager.py -> listeners_exec line:444 [DEBUG] : Interrupt polling
+[2025-05-30  15:44:41.860] plugin_manager.py -> listeners_exec line:444 [DEBUG] : Interrupt polling
+[2025-05-30  15:44:41.861] plugin_manager.py -> listeners_exec line:444 [DEBUG] : Interrupt polling
+[2025-05-30  15:44:41.861] plugin_manager.py -> listeners_exec line:444 [DEBUG] : Interrupt polling
+[2025-05-30  15:44:41.861] plugin_manager.py -> listeners_exec line:444 [DEBUG] : Interrupt polling
+[2025-05-30  15:45:04.950] plugin_manager.py -> listeners_exec line:444 [DEBUG] : Interrupt polling
+[2025-05-30  15:45:04.951] plugin_manager.py -> listeners_exec line:444 [DEBUG] : Interrupt polling
+[2025-05-30  15:45:04.951] plugin_manager.py -> listeners_exec line:444 [DEBUG] : Interrupt polling
+[2025-05-30  15:45:04.952] plugin_manager.py -> listeners_exec line:444 [DEBUG] : Interrupt polling
+[2025-05-30  15:47:01.719] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:47:03.463] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:47:03.464] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:47:03.464] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:47:03.465] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:47:03.465] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:47:03.465] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:47:03.466] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:47:03.466] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:47:08.340] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:47:08.340] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:47:08.340] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:47:08.341] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:50:18.914] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:51:17.863] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:51:33.025] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:51:33.025] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:51:33.026] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:51:33.026] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:51:33.027] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:51:33.028] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:51:33.028] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:51:33.029] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  15:51:33.029] plugin_manager.py -> listeners_exec line:446 [DEBUG] : Interrupt polling
+[2025-05-30  16:00:35.749] plugin_manager.py -> listeners_exec line:452 [DEBUG] : Interrupt polling
+[2025-05-30  16:00:37.886] plugin_manager.py -> listeners_exec line:452 [DEBUG] : Interrupt polling
+[2025-05-30  16:00:37.886] plugin_manager.py -> listeners_exec line:452 [DEBUG] : Interrupt polling
+[2025-05-30  16:00:37.887] plugin_manager.py -> listeners_exec line:452 [DEBUG] : Interrupt polling
+[2025-05-30  16:00:37.888] plugin_manager.py -> listeners_exec line:452 [DEBUG] : Interrupt polling
+[2025-05-30  16:00:37.889] plugin_manager.py -> listeners_exec line:452 [DEBUG] : Interrupt polling
+[2025-05-30  16:00:37.889] plugin_manager.py -> listeners_exec line:452 [DEBUG] : Interrupt polling
+[2025-05-30  16:00:37.890] plugin_manager.py -> listeners_exec line:452 [DEBUG] : Interrupt polling
+[2025-05-30  16:00:37.890] plugin_manager.py -> listeners_exec line:452 [DEBUG] : Interrupt polling
+[2025-05-30  16:00:37.890] plugin_manager.py -> listeners_exec line:452 [DEBUG] : Interrupt polling
+[2025-05-30  16:00:40.675] plugin_manager.py -> listeners_exec line:452 [DEBUG] : Interrupt polling
+[2025-05-30  16:00:40.676] plugin_manager.py -> listeners_exec line:452 [DEBUG] : Interrupt polling
+[2025-05-30  16:00:40.676] plugin_manager.py -> listeners_exec line:452 [DEBUG] : Interrupt polling
+[2025-05-30  16:00:40.676] plugin_manager.py -> listeners_exec line:452 [DEBUG] : Interrupt polling
