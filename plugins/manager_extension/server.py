@@ -170,7 +170,7 @@ def connect_server(ctx, host: str = '127.0.0.1', port: str = '9000'):
     _client_recv_thread.start()
 
 @lr('send', single=True)
-def send_message(ctx, *message_parts):
+def send_message(_, *message_parts):
     """send <msg…> —— 把消息发到服务器"""
     if not _client_sock or _client_sock.fileno() == -1:
         logger.info("[client] not connected — use 'connect' first")
@@ -183,7 +183,7 @@ def send_message(ctx, *message_parts):
             logger.info(f"[client] send failed: {e}")
 
 @lr('disconnect', single=True)
-def disconnect_client(ctx):
+def disconnect_client(_):
     global _client_sock
     if _client_sock:
         with suppress(Exception):

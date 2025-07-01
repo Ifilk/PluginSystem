@@ -1,3 +1,4 @@
+import asyncio
 import difflib
 import logging
 import shlex
@@ -93,6 +94,8 @@ def reactive_cmd(ctx, color='True'):
         try:
             raw = input(PROMPT)
             if raw == 'exit':
+                if ap := ctx.listener_manager.async_pool:
+                    asyncio.run(ap.shutdown(500))
                 exit(0)
             raw = ctx._on_input(raw)[_on_input]
             ws = shlex.split(raw)
@@ -100,7 +103,9 @@ def reactive_cmd(ctx, color='True'):
                 ctx._on_handle(ws[0], (ws[1:]) if len(ws) > 1 else None)
                 history.add(raw)
         except KeyboardInterrupt:
-            print("\nUse 'exit' to quit")
+            if ap := ctx.listener_manager.async_pool:
+                asyncio.run(ap.shutdown(500))
+            exit(0)
         except EOFError:
             exit(0)
 
@@ -112,7 +117,7 @@ def plugin_list(ctx):
     result += '\n'
     result += ("-" * 40)
     result += '\n'
-    for plugin_name, plugin_version in ctx.ctx.plugin_list:
+    for plugin_name, plugin_version in ctx.listener_manager.plugin_list:
         index += 1
         result += (f"{index:<5} {plugin_name:<20} {plugin_version:<10}")
         result += '\n'
@@ -122,7 +127,7 @@ def plugin_list(ctx):
 @lr('list', single=True)
 def trigger_list(ctx):
     result = ''
-    for trigger in ctx.ctx.trigger_list:
+    for trigger in ctx.listener_manager.trigger_list:
         if not trigger.startswith('_'):
             result += trigger
             result += '\n'
