@@ -99,3 +99,18 @@ def a2(ctx):
   print(previous_result)
   return 'a2'
 ```
+- 1.1.3
+  - 更改注册变量名，符合python标准
+- 1.1.4
+  - 实现注册类自动装配功能，不再需要在__init__.py中声明listenerRegister
+  - 实现配置系统，默认路径下configs/xxx/xxx.toml
+```python
+from configuration import ConfigRegistry, Configuration
+
+cr = ConfigRegistry()
+
+@cr.configclass
+class TestConfiguration(Configuration):
+    test: str
+    testInt: int = 10
+```

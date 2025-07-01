@@ -16,9 +16,11 @@ from enum import Enum
 from queue import Queue
 from inspect import signature
 import nest_asyncio
-from typing import Callable, Any, Dict, List, Union
+from typing import Callable, Any, Dict, List, Union, Set, Optional, Awaitable
 
-VERSION = '1.1.2'
+from singleton import singleton, singleton_module_registry
+
+VERSION = '1.1.4'
 
 _empty_function = lambda *args, **kwargs: None
 
@@ -28,14 +30,14 @@ TRIGGER_LOG_FORMAT = '[%(asctime)s.%(msecs)03d] Trigger("%(trigger_name)s") -> %
 DATE_FORMAT = '%Y-%m-%d  %H:%M:%S'
 
 # 主 logger
-logger = logging.getLogger('main_logger')
-logger.setLevel(logging.DEBUG)
+_logger = logging.getLogger('main_logger')
+_logger.setLevel(logging.DEBUG)
 
-if not logger.handlers:
+if not _logger.handlers:
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.DEBUG)
     console_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=DATE_FORMAT))
-    logger.addHandler(console_handler)
+    _logger.addHandler(console_handler)
 
 # listeners 执行日志专用 logger
 _logger_listeners_exec = logging.getLogger('plugin_manager_listeners_exec')
@@ -47,9 +49,6 @@ if not _logger_listeners_exec.handlers:
     listener_handler.setFormatter(logging.Formatter(TRIGGER_LOG_FORMAT, datefmt=DATE_FORMAT))
     _logger_listeners_exec.addHandler(listener_handler)
 
-# 简写
-_logger = logger
-
 @dataclass
 class Listener:
     listener_id: str
@@ -60,7 +59,7 @@ class Listener:
     def __call__(self, *args, **kwargs):
         return self.func(*args, **kwargs)
 
-
+@singleton(scope='module')
 class PluginListenerRegister:
 
     def __init__(self):
@@ -142,51 +141,110 @@ class PluginListenerRegister:
 
 
 class AsyncFunctionPool:
-    def __init__(self, interval: float = 0.1):
+    def __init__(self, interval: float = 0.1, max_concurrent: Optional[int] = None):
         self.interval = interval
         self._queue = Queue()
+        self.max_concurrent = max_concurrent
+        self._active_tasks = 0
         self._running = threading.Event()
         self._running.set()
+        self._shutdown_lock = threading.Lock()
         self._loop_thread = threading.Thread(target=self._loop_worker, daemon=True)
         self._loop_thread.start()
+        self._loop: Optional[asyncio.AbstractEventLoop] = None
 
     def __len__(self) -> int:
         return self._queue.qsize()
 
+    @property
+    def active_tasks(self) -> int:
+        """Return the number of currently active/running tasks."""
+        return self._active_tasks
+
     def add_task(self, coro):
         """Schedule a coroutine from *any* thread."""
+        if not self._running.is_set():
+            return False
         self._queue.put(coro)
+        return True
 
-    def shutdown(self):
-        """Stop the pool gracefully."""
-        self._running.clear()
-        # wake up the event-loop so it notices the flag
-        self._loop.call_soon_threadsafe(lambda: None)
-        self._loop_thread.join()
-        self._loop.close()
+    async def shutdown(self, timeout: Optional[float] = None) -> None:
+        """top the pool gracefully."""
+        with self._shutdown_lock:  # Prevent multiple simultaneous shutdowns
+            if not self._running.is_set():
+                return
+
+            self._running.clear()
+
+            if self._loop is not None:
+                # Wake up the event-loop so it notices the flag
+                self._loop.call_soon_threadsafe(lambda: None)
+
+            if threading.current_thread() != self._loop_thread:
+                # Wait for loop thread to finish if we're not in it
+                self._loop_thread.join(timeout=timeout)
+                if self._loop_thread.is_alive():
+                    raise TimeoutError("Shutdown timed out")
+
+                if self._loop is not None:
+                    self._loop.close()
 
     def _loop_worker(self):
         """Runs in the background thread, owns the event-loop."""
         self._loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self._loop)
-        # kick off the polling coroutine and stay alive
-        self._loop.create_task(self._poll_queue())
-        self._loop.run_forever()
 
-    async def _poll_queue(self):
+        try:
+            # Kick off the polling coroutine and stay alive
+            self._loop.create_task(self._poll_queue())
+            self._loop.run_forever()
+        finally:
+            # Clean up any remaining tasks
+            pending = asyncio.all_tasks(self._loop)
+            for task in pending:
+                task.cancel()
+
+            # Run until all tasks are cancelled
+            self._loop.run_until_complete(
+                asyncio.gather(*pending, return_exceptions=True)
+            )
+
+            # Reset the loop reference since we're shutting down
+            self._loop = None
+
+    async def _poll_queue(self) -> None:
         """Coroutine that pulls tasks off the thread-safe queue."""
         while self._running.is_set():
+            # Check if we've hit max concurrent tasks
+            if self.max_concurrent is not None and self._active_tasks >= self.max_concurrent:
+                await asyncio.sleep(self.interval)
+                continue
+
             try:
-                # non-blocking check
+                # Non-blocking check
                 coro = self._queue.get_nowait()
             except queue.Empty:
                 await asyncio.sleep(self.interval)
                 continue
 
-            try:
-                await coro
-            except Exception:
-                _logger.error(traceback.format_exc())
+            self._active_tasks += 1
+            task = asyncio.create_task(self._run_task(coro))
+            # Add callback to decrement active tasks count when done
+            task.add_done_callback(lambda _: self._decrement_active_tasks())
+
+    def _decrement_active_tasks(self) -> None:
+        """Thread-safe decrement of active tasks counter."""
+        self._active_tasks -= 1
+
+    async def _run_task(self, coro: Awaitable[Any]) -> None:
+        """Wrapper to run a task with proper error handling."""
+        try:
+            await coro
+        except asyncio.CancelledError:
+            # Task was cancelled during shutdown - this is expected
+            pass
+        except Exception:
+            traceback.print_exc()  # Consider using logging module instead
 
 
 class ListenerManagerResponseOperationCode(Enum):
@@ -218,20 +276,22 @@ class ListenerManagerResponse:
 
 
 class ListenerManager:
-    def __init__(self, async_listener=True, verbose=True):
+    def __init__(self, _async=True,
+                 max_concurrent=None):
         self.ctx = None
-        self.trigger_dict = {}
-        self.trigger_list = set([])
+        self.trigger_dict: Dict[str, Callable[..., SignalResponse]] = {}
+        self.trigger_list: Set[str] = set([])
         self.listener_dict: Dict[str, List[Listener]] = {}
-        self.plugin_applied_register = []
-        self.plugin_list = []
-        self.async_listener = async_listener
-        self.verbose = verbose
+        # plugin_id
+        self.plugin_applied_register: List[str] = []
+        # plugin_id - module_name
+        self.plugin_list: Dict[str, str] = {}
+        self.async_listener = _async
         self.unloaded_trigger_list = set([])
         self.loading_lock = threading.Lock()
-        if async_listener:
+        if _async:
             _logger.info('Async ListenerManager is enabled')
-            self.async_pool = AsyncFunctionPool()
+            self.async_pool = AsyncFunctionPool(max_concurrent=max_concurrent)
         else:
             self.async_pool = None
 
@@ -247,13 +307,13 @@ class ListenerManager:
                 l.listener_id = plugin + l.listener_id
                 _logger.debug(f'listener "{l.listener_id}" applied')
 
-        amount = self.merge_dicts(plugin_listener_register.listener_dict)
+        amount = self.merge_listener_dict(plugin_listener_register.listener_dict)
         self.trigger_list.update(plugin_listener_register.listener_dict.keys())
         self.unloaded_trigger_list.update(plugin_listener_register.listener_dict.keys())
 
         return amount
 
-    def merge_dicts(self, dict2):
+    def merge_listener_dict(self, dict2):
         merged_dict = self.listener_dict
         amount = 0
         for key, value in dict2.items():
@@ -283,8 +343,8 @@ class ListenerManager:
         ]
 
         removed_count = 0
-        for event_name in list(self.listener_dict.keys()):
-            listeners = self.listener_dict[event_name]
+        for signal_name in list(self.listener_dict.keys()):
+            listeners = self.listener_dict[signal_name]
 
             remaining_listeners = [
                 lst for lst in listeners
@@ -299,29 +359,49 @@ class ListenerManager:
                     removed_count += 1
 
             if len(remaining_listeners) == 0:
-                del self.listener_dict[event_name]
-                if event_name in self.trigger_list:
-                    self.trigger_list.remove(event_name)
-                _logger.debug(f'Event "{event_name}" removed as it has no more listeners')
+                del self.listener_dict[signal_name]
+                if signal_name in self.trigger_list:
+                    self.trigger_list.remove(signal_name)
+                _logger.debug(f'Event "{signal_name}" removed as it has no more listeners')
             else:
-                self.listener_dict[event_name] = remaining_listeners
-
+                self.listener_dict[signal_name] = remaining_listeners
         _logger.info(f'Unloaded {len(removed_plugins)} plugin(s) and {removed_count} listener(s)')
         return removed_count > 0 or len(removed_plugins) > 0
 
-    def load(self) -> 'SignalContext':
-        nest_asyncio.apply()
-        return self.reload()
+    def load(self) -> Set[str]:
+        try:
+            _logger.debug("Applying nest_asyncio and loading triggers...")
+            nest_asyncio.apply()
+            with self.loading_lock:
+                if not self.listener_dict:
+                    _logger.warning("No listeners registered before load")
+                affected_plugins = self.reload()
+                if not affected_plugins:
+                    _logger.debug("No plugins affected by load")
+                else:
+                    _logger.debug(f"Affected plugins: {affected_plugins}")
+                if not self.trigger_dict:
+                    _logger.warning("No triggers created after load")
+                return affected_plugins
+        except Exception as e:
+            _logger.error(f"Error during load: {str(e)}")
+            _logger.debug(traceback.format_exc())
+            raise
 
-    def reload(self) -> 'SignalContext':
-
+    def reload(self) -> Set[str]:
         self.trigger_dict = {trigger: self.trigger_of(sorted(self.listener_dict[trigger], key=lambda x: -x.order),
                                                       trigger)
                               for trigger in self.unloaded_trigger_list}
+        affected_plugins = set()
+        for trigger in self.unloaded_trigger_list:
+            for listener in self.listener_dict.get(trigger, []):
+                plugin_id = listener.listener_id.split('-', 2)[0] + '-' + listener.listener_id.split('-', 2)[1]
+                affected_plugins.add(plugin_id)
+
         self.unloaded_trigger_list.clear()
         del self.ctx
         self.ctx = SignalContext(self)
-        return self.ctx
+        return affected_plugins
 
     def get_all_listeners(self):
         listeners = []
@@ -361,15 +441,20 @@ class ListenerManager:
         if "__pycache__" in possible_modules:
             possible_modules.remove("__pycache__")
 
+        self.all_plugins = []
+
         for possible_module in possible_modules:
             module_path = os.path.join(plugin_fold_path, possible_module)
             if os.path.isfile(module_path) and os.path.splitext(module_path)[1] != ".py":
                 continue
             if module_path.endswith(".disabled"):
                 continue
+            self.all_plugins.append((possible_module, plugin_fold_path, module_path))
+
+        for possible_module, plugin_fold_path, module_path in self.all_plugins:
             time_before = time.perf_counter()
-            success = self.load_plugin(possible_module, plugin_fold_path)
-            import_times.append((time.perf_counter() - time_before, module_path, success != 0))
+            success, _ = self.load_plugin(possible_module, plugin_fold_path)
+            import_times.append((time.perf_counter() - time_before, module_path, success > 0))
             amount += success
 
         if len(import_times) > 0:
@@ -398,31 +483,31 @@ class ListenerManager:
             module = importlib.util.module_from_spec(module_spec)
             module_spec.loader.exec_module(module)
 
-            plugin_name = getattr(module, 'PLUGIN_NAME', module.__package__) or module.__name__
-            plugin_version = getattr(module, 'PLUGIN_VERSION', 'null')
-            if (plugin_name, plugin_version) in self.plugin_list:
+            plugin_name = getattr(module, '__name__ ', module.__package__) or module.__name__
+            plugin_version = getattr(module, '__version__ ', 'null')
+            if f'{plugin_name}-{plugin_version}' in self.plugin_list:
                 raise Exception(f'Plugin {plugin_name}-{plugin_version} already registered')
-            self.plugin_list.append((plugin_name, plugin_version))
+            self.plugin_list[f'{plugin_name}-{plugin_version}'] = module_name
 
-            if hasattr(module, 'LISTENER_REGISTER'):
-                module.LISTENER_REGISTER.generate_id(plugin_name, plugin_version)
-                amount = self.apply_plugin_listener_register(module.LISTENER_REGISTER)
+            registers = []
+            smr = singleton_module_registry[module.__name__].get(PluginListenerRegister._original_class)
+            if hasattr(module, '__listener_register__'):
+                registers.append(module.__listener_register__)
+            elif smr is not None:
+                registers.append(smr)
             else:
-                if module.__package__.startswith('lib'):
-                    return amount
-                possible = [v for v in module.__dict__.values() if isinstance(v, PluginListenerRegister)]
-                for plugin in possible:
-                    plugin.generate_id(plugin_name, plugin_version)
-                    amount = self.apply_plugin_listener_register(plugin)
-            return amount
+                registers = [v for v in module.__dict__.values() if isinstance(v, PluginListenerRegister._original_class)]
+            for _r in registers:
+                _r.generate_id(plugin_name, plugin_version)
+                amount += self.apply_plugin_listener_register(_r)
+            return amount, module
         except Exception as e:
             _logger.warning(traceback.format_exc())
             _logger.warning(f"Cannot import {module_path} module for custom nodes: {e}")
-            return amount
+            return -1, None
 
     def trigger_of(self, ls_list: List[Listener], trigger_name):
         loop = asyncio.get_event_loop()
-        verbose = self.verbose
         async_pool = self.async_pool
         async_listener = self.async_listener
 
@@ -434,50 +519,43 @@ class ListenerManager:
             token = self.ctx.set_context(result_dict)
             for ls in ls_list:
                 try:
-                    if ls.listener_id not in skip_list:
-                        result = safe_execute_listener(ls, self.ctx, args, kwargs)
-                        if ls.single or result == ListenerManagerResponseOperationCode.INTERRUPT:
-                            _logger_listeners_exec.debug('Interrupt polling', extra={'trigger_name': trigger_name,
-                                                                                     'listener_id': ls.listener_id})
-                            if asyncio.iscoroutine(result):
-                                async_pool.add_task(result)
-                                break
-                            result_dict[ls.listener_id] = result
-                            break
-                        elif result is None:
-                            continue
-                        elif result == ListenerManagerResponseOperationCode.EXIT_FOR_FATAL_ERROR:
-                            raise FatalException('Manual Exit')
-                        elif isinstance(result, ListenerManagerResponse):
-                            if result.operation == ListenerManagerResponseOperationCode.INTERRUPT:
-                                _logger_listeners_exec.debug('Interrupt polling',
-                                                             extra={'trigger_name': trigger_name,
-                                                                    'listener_id': ls.listener_id})
-                                result_dict[ls.listener_id] = result.param
-                                break
-                            elif result.operation == ListenerManagerResponseOperationCode.EXIT_FOR_FATAL_ERROR:
-                                raise FatalException(str(result.param))
-                            elif result.operation == ListenerManagerResponseOperationCode.SKIP:
-                                if isinstance(result.param, str):
-                                    skip_list.append(result.param)
-                                elif isinstance(result.param, list):
-                                    skip_list.extend(result.param)
-                        elif asyncio.iscoroutine(result):
-                            if async_listener:
-                                async_pool.add_task(result)
-                            else:
-                                async_task_list.append(result)
+                    if ls.listener_id in skip_list:
+                        continue
+
+                    result = safe_execute_listener(ls, self.ctx, args, kwargs)
+
+                    if ls.single:
+                        _logger_listeners_exec.debug('Interrupt polling', extra={'trigger_name': trigger_name,
+                                                                                 'listener_id': ls.listener_id})
+                        if asyncio.iscoroutine(result):
+                            handle_coroutine(result, ls, async_listener, async_pool, async_task_list)
                         else:
                             result_dict[ls.listener_id] = result
+                        break
+
+                    if result == ListenerManagerResponseOperationCode.INTERRUPT or result == ListenerManagerResponseOperationCode.EXIT_FOR_FATAL_ERROR:
+                        status = handle_response_code(result, ls, result_dict, skip_list, trigger_name)
+                        if status == 'break':
+                            break
+                    elif result is None:
+                        continue
+                    elif isinstance(result, ListenerManagerResponse):
+                        status = handle_response_object(result, ls, result_dict, skip_list, trigger_name)
+                        if status == 'break':
+                            break
+                    elif asyncio.iscoroutine(result):
+                        handle_coroutine(result, ls, async_listener, async_pool, async_task_list)
+                    else:
+                        result_dict[ls.listener_id] = result
+
                 except FatalException as e:
-                    _logger_listeners_exec.error(traceback.format_exc(), extra={'trigger_name': trigger_name,
-                                                                                'listener_id': ls.listener_id})
+                    _logger_listeners_exec.error(traceback.format_exc(),
+                                                 extra={'trigger_name': trigger_name, 'listener_id': ls.listener_id})
                     raise e
                 except SignalEmitException as e:
-                    _logger_listeners_exec.error(e, extra={'trigger_name': trigger_name,
-                                                           'listener_id': ls.listener_id})
+                    _logger_listeners_exec.error(e, extra={'trigger_name': trigger_name, 'listener_id': ls.listener_id})
                 except Exception as e:
-                    exception.append((ls.listener_id, traceback.format_exc() if verbose else e))
+                    exception.append((ls.listener_id, traceback.format_exc()))
             self.ctx.reset_context(token)
             if not async_listener:
                 for async_task in async_task_list:
@@ -546,6 +624,36 @@ class SignalResponse:
         return self.__result.values()
 
 
+def handle_coroutine(result, ls, async_listener, async_pool, async_task_list):
+    if async_listener:
+        async_pool.add_task(result)
+    else:
+        async_task_list.append(result)
+
+def handle_response_code(result, ls, result_dict, skip_list, trigger_name):
+    if result == ListenerManagerResponseOperationCode.INTERRUPT:
+        _logger_listeners_exec.debug('Interrupt polling', extra={'trigger_name': trigger_name, 'listener_id': ls.listener_id})
+        result_dict[ls.listener_id] = result
+        return 'break'
+    elif result == ListenerManagerResponseOperationCode.EXIT_FOR_FATAL_ERROR:
+        raise FatalException('Manual Exit')
+    return 'continue'
+
+def handle_response_object(result, ls, result_dict, skip_list, trigger_name):
+    if result.operation == ListenerManagerResponseOperationCode.INTERRUPT:
+        _logger_listeners_exec.debug('Interrupt polling', extra={'trigger_name': trigger_name, 'listener_id': ls.listener_id})
+        result_dict[ls.listener_id] = result.param
+        return 'break'
+    elif result.operation == ListenerManagerResponseOperationCode.EXIT_FOR_FATAL_ERROR:
+        raise FatalException(str(result.param))
+    elif result.operation == ListenerManagerResponseOperationCode.SKIP:
+        if isinstance(result.param, str):
+            skip_list.append(result.param)
+        elif isinstance(result.param, list):
+            skip_list.extend(result.param)
+    return 'continue'
+
+
 def format_error_output(listener: Listener, e):
     func_name = listener.__name__
     signature_str = listener.__doc__
@@ -561,7 +669,7 @@ def safe_execute_listener(listener, context, args, kwargs, depth=0):
         return listener(context, *args, **kwargs) if context else listener()
     except TypeError as e:
         msg = str(e)
-        if depth > 1:
+        if listener.__name__ not in msg or depth > 1:
             raise e
         depth += 1
         if re.search(r"takes \d+ positional arguments but", msg):
